@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Heladería ACMO - Inventario y POS</title>
+    <title>Delihelados - Control de Inventario y POS</title>
+    <!-- Icono de pestaña (Favicon) con la imagen del logo -->
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
 
@@ -47,7 +49,7 @@
 
         /* Pantalla de Login */
         #login-screen {
-            padding: 50px;
+            padding: 40px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -56,9 +58,19 @@
             height: 650px;
         }
 
+        .logo-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--verde-pastel);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+        }
+
         h1, h2, h3 {
             color: var(--texto-oscuro);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         input, select {
@@ -100,11 +112,25 @@
         /* Barra Superior (Header con Tasa editable) */
         .app-header {
             background-color: var(--verde-pastel);
-            padding: 15px 25px;
+            padding: 12px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 3px solid #e2f4ed;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
         }
 
         .tasa-box {
@@ -216,7 +242,8 @@
         <!-- 1. PANTALLA DE LOGIN -->
         <div id="login-screen">
             <div style="max-width: 350px; width: 100%;">
-                <h2>🍦 Heladería ACMO</h2>
+                <img src="logo.png" alt="Delihelados Logo" class="logo-img" onerror="this.style.display='none'">
+                <h2>🍦 Delihelados</h2>
                 <p style="margin-bottom: 20px; color: #777;">Control de Inventario y POS</p>
                 <input type="text" id="user-input" placeholder="Usuario (ej: admin)">
                 <input type="password" id="pass-input" placeholder="Contraseña (ej: 1234)">
@@ -229,7 +256,10 @@
             
             <!-- Barra Superior -->
             <div class="app-header">
-                <h3>🍨 Sistema Heladería ACMO</h3>
+                <div class="header-brand">
+                    <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
+                    <h3 style="margin:0;">Delihelados</h3>
+                </div>
                 <div class="tasa-box">
                     <span>Tasa USD ($):</span>
                     <input type="number" id="tasa-cambio" value="36.50" step="0.1">
@@ -345,7 +375,7 @@
             <div id="tab-caja" class="panel-content hidden">
                 <h2>Cierre de Caja Diario</h2>
                 <div class="card" id="area-cierre" style="background: #fff; border: 2px solid var(--verde-pastel);">
-                    <h3>Reporte de Caja - Heladería ACMO</h3>
+                    <h3>Reporte de Caja - Delihelados</h3>
                     <p>Fecha: <span id="fecha-hoy"></span></p>
                     <hr style="margin: 10px 0;">
                     <p>Total de Ventas Realizadas: <strong id="total-ventas-cantidad">0</strong></p>
@@ -362,16 +392,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        // Inventario dividido en 3 secciones (Barquillas, Tinas, Paletas)
-        // Nota: En barquillas y tinas, guardamos gaveras. 1 Gavera = 50 bolitas.
         let inventario = {
             barquillas: [
-                { id: 'b1', nombre: 'Chocolate', precio: 2.50, gaveras: 2 }, // 100 bolitas
-                { id: 'b2', nombre: 'Fresa', precio: 2.50, gaveras: 1.5 }     // 75 bolitas
+                { id: 'b1', nombre: 'Chocolate', precio: 2.50, gaveras: 2 },
+                { id: 'b2', nombre: 'Fresa', precio: 2.50, gaveras: 1.5 }
             ],
             tinas: [
-                { id: 't1', nombre: 'Mantecado', precio: 2.00, gaveras: 3 },  // 150 bolitas
-                { id: 't2', nombre: 'Puruco / Oreo', precio: 3.00, gaveras: 2} // 100 bolitas
+                { id: 't1', nombre: 'Mantecado', precio: 2.00, gaveras: 3 },
+                { id: 't2', nombre: 'Puruco / Oreo', precio: 3.00, gaveras: 2}
             ],
             paletas: [
                 { id: 'p1', nombre: 'Paleta de Chocomenta', precio: 1.50, unidades: 24 },
@@ -417,7 +445,6 @@
             let select = document.getElementById('producto-select');
             select.innerHTML = '';
 
-            // Cargar Barquillas
             inventario.barquillas.forEach(item => {
                 let bolitasTotales = item.gaveras * 50;
                 let opt = document.createElement('option');
@@ -426,7 +453,6 @@
                 select.appendChild(opt);
             });
 
-            // Cargar Tinas
             inventario.tinas.forEach(item => {
                 let bolitasTotales = item.gaveras * 50;
                 let opt = document.createElement('option');
@@ -435,7 +461,6 @@
                 select.appendChild(opt);
             });
 
-            // Cargar Paletas
             inventario.paletas.forEach(item => {
                 let opt = document.createElement('option');
                 opt.value = `paletas_${item.id}`;
@@ -460,7 +485,6 @@
                     return;
                 }
             } else {
-                // Es barquilla o tina (se descuenta de gaveras: 1 gavera = 50 bolitas -> 1 bolita = 1/50 gaveras)
                 let bolitasDisponibles = item.gaveras * 50;
                 if(bolitasDisponibles >= cant) {
                     let gaverasAGastar = cant / 50;
@@ -471,7 +495,6 @@
                 }
             }
 
-            // Agregar o actualizar en el ticket
             let existe = pedidoActual.find(p => p.id === id && p.seccion === seccion);
             if(existe) {
                 existe.cantidad += cant;
@@ -527,7 +550,6 @@
         }
 
         function renderizarInventario() {
-            // Render Barquillas
             let tbodyB = document.getElementById('tabla-barquillas');
             tbodyB.innerHTML = '';
             inventario.barquillas.forEach((item, index) => {
@@ -542,7 +564,6 @@
                     </tr>`;
             });
 
-            // Render Tinas
             let tbodyT = document.getElementById('tabla-tinas');
             tbodyT.innerHTML = '';
             inventario.tinas.forEach((item, index) => {
@@ -557,7 +578,6 @@
                     </tr>`;
             });
 
-            // Render Paletas
             let tbodyP = document.getElementById('tabla-paletas');
             tbodyP.innerHTML = '';
             inventario.paletas.forEach((item, index) => {
@@ -611,12 +631,11 @@
             renderizarInventario();
         }
 
-        // Descargar Cierre de Caja como Imagen
         function descargarCierreImagen() {
             let area = document.getElementById('area-cierre');
             html2canvas(area).then(canvas => {
                 let link = document.createElement('a');
-                link.download = 'cierre-de-caja-heladeria.png';
+                link.download = 'cierre-de-caja-delihelados.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
