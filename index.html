@@ -197,12 +197,12 @@
             border: 1px solid #eee;
         }
 
-        /* Tarjetas de productos seleccionables estilo botón moderno */
+        /* Tarjetas de productos seleccionables */
         .productos-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 10px;
-            max-height: 380px;
+            max-height: 310px;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -308,14 +308,15 @@
                 <button class="tab-btn" onclick="switchTab('caja')">Cierre de Caja</button>
             </div>
 
-            <!-- Pestaña 1: POS / Pedidos (Diseño Moderno sin Selects feos) -->
+            <!-- Pestaña 1: POS / Pedidos con Buscador -->
             <div id="tab-pos" class="panel-content">
                 <h2>Registrar Venta / Pedido</h2>
                 <div class="grid-pos">
                     <div>
-                        <p style="margin-bottom: 10px; color: #666; font-size: 0.95rem;">Selecciona un producto haciendo clic:</p>
+                        <!-- Buscador en tiempo real -->
+                        <input type="text" id="buscador-productos" placeholder="🔍 Buscar producto por nombre..." onkeyup="filtrarProductos()" style="margin-bottom: 10px;">
                         <div class="productos-grid" id="lista-productos-pos">
-                            <!-- Se llena dinámicamente con botones estéticos -->
+                            <!-- Se llena dinámicamente -->
                         </div>
                         <div style="margin-top: 15px; display: flex; gap: 15px; align-items: center;">
                             <div style="flex-grow: 1;">
@@ -484,51 +485,63 @@
             }
         }
 
-        function renderizarPOSProductos() {
+        function renderizarPOSProductos(filtro = '') {
             let contenedor = document.getElementById('lista-productos-pos');
             contenedor.innerHTML = '';
             productoSeleccionadoPOS = null;
+            let textoFiltro = filtro.toLowerCase();
 
             // Renderizar Barquillas
             inventario.barquillas.forEach(item => {
-                let bolitas = item.gaveras * 50;
-                contenedor.innerHTML += `
-                    <div class="producto-card" onclick="seleccionarProductoPOS('barquillas', '${item.id}', this)">
-                        <div>
-                            <strong>🍦 [Barquilla] ${item.nombre}</strong>
-                            <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                if(item.nombre.toLowerCase().includes(textoFiltro)) {
+                    let bolitas = item.gaveras * 50;
+                    contenedor.innerHTML += `
+                        <div class="producto-card" onclick="seleccionarProductoPOS('barquillas', '${item.id}', this)">
+                            <div>
+                                <strong>🍦 [Barquilla] ${item.nombre}</strong>
+                                <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                            </div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
                         </div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
-                    </div>
-                `;
+                    `;
+                }
             });
 
             // Renderizar Tinas
             inventario.tinas.forEach(item => {
-                let bolitas = item.gaveras * 50;
-                contenedor.innerHTML += `
-                    <div class="producto-card" onclick="seleccionarProductoPOS('tinas', '${item.id}', this)">
-                        <div>
-                            <strong>🍨 [Tina] ${item.nombre}</strong>
-                            <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                if(item.nombre.toLowerCase().includes(textoFiltro)) {
+                    let bolitas = item.gaveras * 50;
+                    contenedor.innerHTML += `
+                        <div class="producto-card" onclick="seleccionarProductoPOS('tinas', '${item.id}', this)">
+                            <div>
+                                <strong>🍨 [Tina] ${item.nombre}</strong>
+                                <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                            </div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
                         </div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
-                    </div>
-                `;
+                    `;
+                }
             });
 
             // Renderizar Paletas
             inventario.paletas.forEach(item => {
-                contenedor.innerHTML += `
-                    <div class="producto-card" onclick="seleccionarProductoPOS('paletas', '${item.id}', this)">
-                        <div>
-                            <strong>🧊 [Paleta] ${item.nombre}</strong>
-                            <div style="font-size: 0.85rem; color: #666;">Stock: ${item.unidades} unids</div>
+                if(item.nombre.toLowerCase().includes(textoFiltro)) {
+                    contenedor.innerHTML += `
+                        <div class="producto-card" onclick="seleccionarProductoPOS('paletas', '${item.id}', this)">
+                            <div>
+                                <strong>🧊 [Paleta] ${item.nombre}</strong>
+                                <div style="font-size: 0.85rem; color: #666;">Stock: ${item.unidades} unids</div>
+                            </div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
                         </div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
-                    </div>
-                `;
+                    `;
+                }
             });
+        }
+
+        function filtrarProductos() {
+            let texto = document.getElementById('buscador-productos').value;
+            renderizarPOSProductos(texto);
         }
 
         function seleccionarProductoPOS(seccion, id, elemento) {
@@ -573,6 +586,7 @@
                 pedidoActual.push({ id: item.id, seccion: seccion, nombre: `[${seccion.toUpperCase()}] ${item.nombre}`, precio: item.precio, cantidad: cant });
             }
 
+            document.getElementById('buscador-productos').value = '';
             renderizarPOSProductos();
             renderizarPedido();
             renderizarInventario();
