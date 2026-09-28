@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delihelados - Control de Inventario y POS</title>
-    <!-- Icono de pestaña (Favicon) con la imagen del logo -->
+    <!-- Icono de pestaña (Favicon) -->
     <link rel="icon" type="image/png" href="logo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
@@ -16,7 +16,7 @@
             --verde-oscuro: #509e82;
             --texto-oscuro: #4a4a4a;
             --blanco: #ffffff;
-            --sombra: 0 4px 15px rgba(0,0,0,0.08);
+            --sombra: 0 8px 25px rgba(0,0,0,0.1);
         }
 
         * {
@@ -58,14 +58,20 @@
             height: 650px;
         }
 
+        /* Especificaciones Pro para el Logo Principal (Ideal para Directos) */
         .logo-img {
-            width: 90px;
-            height: 90px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--verde-pastel);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 12px;
+            border: 4px solid var(--verde-pastel);
+            box-shadow: 0 6px 15px rgba(80, 158, 130, 0.3);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
         }
 
         h1, h2, h3 {
@@ -109,7 +115,7 @@
             display: none !important;
         }
 
-        /* Barra Superior (Header con Tasa editable) */
+        /* Barra Superior con Logo en Miniatura */
         .app-header {
             background-color: var(--verde-pastel);
             padding: 12px 25px;
@@ -126,11 +132,12 @@
         }
 
         .header-logo {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
         .tasa-box {
@@ -242,11 +249,12 @@
         <!-- 1. PANTALLA DE LOGIN -->
         <div id="login-screen">
             <div style="max-width: 350px; width: 100%;">
+                <!-- Logo con diseño profesional para stream -->
                 <img src="logo.png" alt="Delihelados Logo" class="logo-img" onerror="this.style.display='none'">
                 <h2>🍦 Delihelados</h2>
                 <p style="margin-bottom: 20px; color: #777;">Control de Inventario y POS</p>
-                <input type="text" id="user-input" placeholder="Usuario (ej: admin)">
-                <input type="password" id="pass-input" placeholder="Contraseña (ej: 1234)">
+                <input type="text" id="user-input" placeholder="Usuario">
+                <input type="password" id="pass-input" placeholder="Contraseña">
                 <button onclick="login()" style="width: 100%; margin-top: 10px;">Entrar al Sistema</button>
             </div>
         </div>
@@ -254,7 +262,7 @@
         <!-- 2. APLICACIÓN PRINCIPAL -->
         <div id="app-screen" class="hidden">
             
-            <!-- Barra Superior -->
+            <!-- Barra Superior con Logo -->
             <div class="app-header">
                 <div class="header-brand">
                     <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
@@ -414,14 +422,16 @@
         function login() {
             let u = document.getElementById('user-input').value;
             let p = document.getElementById('pass-input').value;
-            if(u !== "" && p !== "") {
+            
+            // Usuario exacto: leo / Contraseña exacta: 2342
+            if(u === "leo" && p === "2342") {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 actualizarSelectProductos();
                 renderizarInventario();
                 document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString();
             } else {
-                alert("Por favor ingrese usuario y contraseña.");
+                alert("Usuario o contraseña incorrectos. (Usa: leo / 2342)");
             }
         }
 
