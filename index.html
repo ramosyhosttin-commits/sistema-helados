@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delihelados - Control de Inventario y POS</title>
-    <!-- Icono de pestaña (Favicon) -->
     <link rel="icon" type="image/png" href="logo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
@@ -37,14 +36,14 @@
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1050px;
             background: var(--blanco);
             border-radius: 20px;
             box-shadow: var(--sombra);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 650px;
+            min-height: 680px;
         }
 
         /* Pantalla de Login */
@@ -55,10 +54,9 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 650px;
+            height: 680px;
         }
 
-        /* Especificaciones Pro para el Logo Principal (Ideal para Directos) */
         .logo-img {
             width: 110px;
             height: 110px;
@@ -67,11 +65,6 @@
             border: 4px solid var(--verde-pastel);
             box-shadow: 0 6px 15px rgba(80, 158, 130, 0.3);
             margin-bottom: 15px;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-img:hover {
-            transform: scale(1.05);
         }
 
         h1, h2, h3 {
@@ -115,10 +108,10 @@
             display: none !important;
         }
 
-        /* Barra Superior con Logo en Miniatura */
+        /* Barra Superior */
         .app-header {
             background-color: var(--verde-pastel);
-            padding: 12px 25px;
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -188,12 +181,12 @@
             padding: 25px;
             flex-grow: 1;
             overflow-y: auto;
-            max-height: 520px;
+            max-height: 540px;
         }
 
-        .grid-2 {
+        .grid-pos {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.3fr 1fr;
             gap: 20px;
         }
 
@@ -202,6 +195,40 @@
             padding: 20px;
             border-radius: 12px;
             border: 1px solid #eee;
+        }
+
+        /* Tarjetas de productos seleccionables estilo botón moderno */
+        .productos-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .producto-card {
+            background: var(--blanco);
+            border: 2px solid var(--verde-pastel);
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .producto-card:hover {
+            background: #f0faf5;
+            border-color: var(--verde-oscuro);
+            transform: translateY(-2px);
+        }
+
+        .producto-card.selected {
+            background: var(--verde-pastel);
+            border-color: var(--verde-oscuro);
+            font-weight: bold;
         }
 
         table {
@@ -228,7 +255,7 @@
             border: 2px dashed var(--rosa-pastel);
             border-radius: 10px;
             margin-top: 10px;
-            max-height: 150px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
@@ -238,7 +265,8 @@
             padding-bottom: 5px;
             margin-top: 15px;
             margin-bottom: 10px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -249,12 +277,11 @@
         <!-- 1. PANTALLA DE LOGIN -->
         <div id="login-screen">
             <div style="max-width: 350px; width: 100%;">
-                <!-- Logo con diseño profesional para stream -->
                 <img src="logo.png" alt="Delihelados Logo" class="logo-img" onerror="this.style.display='none'">
                 <h2>🍦 Delihelados</h2>
                 <p style="margin-bottom: 20px; color: #777;">Control de Inventario y POS</p>
-                <input type="text" id="user-input" placeholder="Usuario">
-                <input type="password" id="pass-input" placeholder="Contraseña">
+                <input type="text" id="user-input" placeholder="Usuario (leo)">
+                <input type="password" id="pass-input" placeholder="Contraseña (2342)">
                 <button onclick="login()" style="width: 100%; margin-top: 10px;">Entrar al Sistema</button>
             </div>
         </div>
@@ -262,7 +289,7 @@
         <!-- 2. APLICACIÓN PRINCIPAL -->
         <div id="app-screen" class="hidden">
             
-            <!-- Barra Superior con Logo -->
+            <!-- Barra Superior -->
             <div class="app-header">
                 <div class="header-brand">
                     <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
@@ -281,18 +308,24 @@
                 <button class="tab-btn" onclick="switchTab('caja')">Cierre de Caja</button>
             </div>
 
-            <!-- Pestaña 1: POS / Pedidos -->
+            <!-- Pestaña 1: POS / Pedidos (Diseño Moderno sin Selects feos) -->
             <div id="tab-pos" class="panel-content">
                 <h2>Registrar Venta / Pedido</h2>
-                <div class="grid-2">
+                <div class="grid-pos">
                     <div>
-                        <label>Seleccionar Producto:</label>
-                        <select id="producto-select">
-                            <!-- Se llena por JavaScript -->
-                        </select>
-                        <label>Cantidad (Bolitas / Unidades):</label>
-                        <input type="number" id="cantidad-input" value="1" min="1">
-                        <button onclick="agregarAlPedido()" style="margin-top: 15px; width: 100%;">Añadir al Pedido</button>
+                        <p style="margin-bottom: 10px; color: #666; font-size: 0.95rem;">Selecciona un producto haciendo clic:</p>
+                        <div class="productos-grid" id="lista-productos-pos">
+                            <!-- Se llena dinámicamente con botones estéticos -->
+                        </div>
+                        <div style="margin-top: 15px; display: flex; gap: 15px; align-items: center;">
+                            <div style="flex-grow: 1;">
+                                <label>Cantidad:</label>
+                                <input type="number" id="cantidad-input" value="1" min="1" style="margin:0;">
+                            </div>
+                            <div style="padding-top: 22px;">
+                                <button onclick="agregarAlPedido()">Añadir al Ticket</button>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <h3>Resumen del Ticket</h3>
@@ -300,7 +333,7 @@
                             <p style="color: #888;">No hay productos agregados.</p>
                         </div>
                         <h3 id="total-pagar" style="margin-top: 15px; color: var(--verde-oscuro);">Total: $0.00</h3>
-                        <button onclick="procesarPago()" style="background-color: #ff7675; width: 100%; margin-top: 10px;">Cobrar Venta</button>
+                        <button onclick="procesarPago()" style="background-color: #ff7675; width: 100%; margin-top: 15px;">Cobrar Venta</button>
                     </div>
                 </div>
             </div>
@@ -357,7 +390,7 @@
                 <!-- AGREGAR NUEVO PRODUCTO -->
                 <div class="card" style="margin-top: 20px;">
                     <h3>Agregar Nuevo Producto al Inventario</h3>
-                    <div class="grid-2">
+                    <div class="grid-pos" style="grid-template-columns: 1fr 1fr;">
                         <div>
                             <label>Sección:</label>
                             <select id="nuevo-seccion">
@@ -371,7 +404,7 @@
                         <div>
                             <label>Precio ($):</label>
                             <input type="number" id="nuevo-precio" placeholder="0.00" step="0.1">
-                            <label id="label-stock-nuevo">Gaveras (o Unidades si es paleta):</label>
+                            <label>Gaveras (o Unidades si es paleta):</label>
                             <input type="number" id="nuevo-stock" placeholder="Cantidad" value="1">
                         </div>
                     </div>
@@ -418,16 +451,16 @@
         let pedidoActual = [];
         let totalVentasDia = 0;
         let cantidadVentasDia = 0;
+        let productoSeleccionadoPOS = null;
 
         function login() {
             let u = document.getElementById('user-input').value;
             let p = document.getElementById('pass-input').value;
             
-            // Usuario exacto: leo / Contraseña exacta: 2342
             if(u === "leo" && p === "2342") {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                actualizarSelectProductos();
+                renderizarPOSProductos();
                 renderizarInventario();
                 document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString();
             } else {
@@ -451,40 +484,68 @@
             }
         }
 
-        function actualizarSelectProductos() {
-            let select = document.getElementById('producto-select');
-            select.innerHTML = '';
+        function renderizarPOSProductos() {
+            let contenedor = document.getElementById('lista-productos-pos');
+            contenedor.innerHTML = '';
+            productoSeleccionadoPOS = null;
 
+            // Renderizar Barquillas
             inventario.barquillas.forEach(item => {
-                let bolitasTotales = item.gaveras * 50;
-                let opt = document.createElement('option');
-                opt.value = `barquillas_${item.id}`;
-                opt.text = `[Barquilla] ${item.nombre} - $${item.precio.toFixed(2)} (Disponibles: ${bolitasTotales} bolitas)`;
-                select.appendChild(opt);
+                let bolitas = item.gaveras * 50;
+                contenedor.innerHTML += `
+                    <div class="producto-card" onclick="seleccionarProductoPOS('barquillas', '${item.id}', this)">
+                        <div>
+                            <strong>🍦 [Barquilla] ${item.nombre}</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                        </div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
+                    </div>
+                `;
             });
 
+            // Renderizar Tinas
             inventario.tinas.forEach(item => {
-                let bolitasTotales = item.gaveras * 50;
-                let opt = document.createElement('option');
-                opt.value = `tinas_${item.id}`;
-                opt.text = `[Tina] ${item.nombre} - $${item.precio.toFixed(2)} (Disponibles: ${bolitasTotales} bolitas)`;
-                select.appendChild(opt);
+                let bolitas = item.gaveras * 50;
+                contenedor.innerHTML += `
+                    <div class="producto-card" onclick="seleccionarProductoPOS('tinas', '${item.id}', this)">
+                        <div>
+                            <strong>🍨 [Tina] ${item.nombre}</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Disponibles: ${bolitas} bolitas</div>
+                        </div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
+                    </div>
+                `;
             });
 
+            // Renderizar Paletas
             inventario.paletas.forEach(item => {
-                let opt = document.createElement('option');
-                opt.value = `paletas_${item.id}`;
-                opt.text = `[Paleta] ${item.nombre} - $${item.precio.toFixed(2)} (Stock: ${item.unidades} unids)`;
-                select.appendChild(opt);
+                contenedor.innerHTML += `
+                    <div class="producto-card" onclick="seleccionarProductoPOS('paletas', '${item.id}', this)">
+                        <div>
+                            <strong>🧊 [Paleta] ${item.nombre}</strong>
+                            <div style="font-size: 0.85rem; color: #666;">Stock: ${item.unidades} unids</div>
+                        </div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--verde-oscuro);">$${item.precio.toFixed(2)}</div>
+                    </div>
+                `;
             });
         }
 
-        function agregarAlPedido() {
-            let val = document.getElementById('producto-select').value;
-            let cant = parseInt(document.getElementById('cantidad-input').value);
-            if(!val || isNaN(cant) || cant <= 0) return;
+        function seleccionarProductoPOS(seccion, id, elemento) {
+            document.querySelectorAll('.producto-card').forEach(el => el.classList.remove('selected'));
+            elemento.classList.add('selected');
+            productoSeleccionadoPOS = { seccion, id };
+        }
 
-            let [seccion, id] = val.split('_');
+        function agregarAlPedido() {
+            if(!productoSeleccionadoPOS) {
+                alert("Por favor selecciona un producto de la lista.");
+                return;
+            }
+            let cant = parseInt(document.getElementById('cantidad-input').value);
+            if(isNaN(cant) || cant <= 0) return;
+
+            let { seccion, id } = productoSeleccionadoPOS;
             let item = inventario[seccion].find(i => i.id === id);
 
             if(seccion === 'paletas') {
@@ -512,7 +573,7 @@
                 pedidoActual.push({ id: item.id, seccion: seccion, nombre: `[${seccion.toUpperCase()}] ${item.nombre}`, precio: item.precio, cantidad: cant });
             }
 
-            actualizarSelectProductos();
+            renderizarPOSProductos();
             renderizarPedido();
             renderizarInventario();
         }
@@ -539,7 +600,7 @@
             contenedor.innerHTML = html;
 
             let totalBs = totalUSD * tasa;
-            totalDiv.innerHTML = `Total: $${totalUSD.toFixed(2)} USD <br><span style="font-size: 1rem; color: #666;">Bs. ${totalBs.toFixed(2)}</span>`;
+            totalDiv.innerHTML = `Total: $${totalUSD.toFixed(2)} USD <br><span style="font-size: 0.95rem; color: #666;">Bs. ${totalBs.toFixed(2)}</span>`;
         }
 
         function procesarPago() {
@@ -600,7 +661,7 @@
                     </tr>`;
             });
 
-            actualizarSelectProductos();
+            renderizarPOSProductos();
         }
 
         function editarInventario(seccion, index, campo, valor) {
