@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Heladería ACMO - Inventario y POS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
+
+        :root {
+            --rosa-pastel: #ffb7b2;
+            --rosa-claro: #ffe5e2;
+            --verde-pastel: #b5ead7;
+            --verde-oscuro: #509e82;
+            --texto-oscuro: #4a4a4a;
+            --blanco: #ffffff;
+            --sombra: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background-color: var(--rosa-claro);
+            color: var(--texto-oscuro);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--blanco);
+            border-radius: 20px;
+            box-shadow: var(--sombra);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 650px;
+        }
+
+        /* Pantalla de Login */
+        #login-screen {
+            padding: 50px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 650px;
+        }
+
+        h1, h2, h3 {
+            color: var(--texto-oscuro);
+            margin-bottom: 15px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--verde-oscuro);
+        }
+
+        button {
+            background-color: var(--verde-oscuro);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Barra Superior (Header con Tasa editable) */
+        .app-header {
+            background-color: var(--verde-pastel);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #e2f4ed;
+        }
+
+        .tasa-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--blanco);
+            padding: 5px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tasa-box input {
+            width: 80px;
+            margin: 0;
+            padding: 5px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Navegación interna */
+        .nav-tabs {
+            display: flex;
+            background-color: var(--rosa-pastel);
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.6);
+            color: var(--texto-oscuro);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background: var(--blanco);
+            color: var(--verde-oscuro);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Contenido de Paneles */
+        .panel-content {
+            padding: 25px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 520px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .ticket-preview {
+            background: #fff;
+            padding: 15px;
+            border: 2px dashed var(--rosa-pastel);
+            border-radius: 10px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            color: var(--verde-oscuro);
+            border-bottom: 2px solid var(--verde-pastel);
+            padding-bottom: 5px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- 1. PANTALLA DE LOGIN -->
+        <div id="login-screen">
+            <div style="max-width: 350px; width: 100%;">
+                <h2>🍦 Heladería ACMO</h2>
+                <p style="margin-bottom: 20px; color: #777;">Control de Inventario y POS</p>
+                <input type="text" id="user-input" placeholder="Usuario (ej: admin)">
+                <input type="password" id="pass-input" placeholder="Contraseña (ej: 1234)">
+                <button onclick="login()" style="width: 100%; margin-top: 10px;">Entrar al Sistema</button>
+            </div>
+        </div>
+
+        <!-- 2. APLICACIÓN PRINCIPAL -->
+        <div id="app-screen" class="hidden">
+            
+            <!-- Barra Superior -->
+            <div class="app-header">
+                <h3>🍨 Sistema Heladería ACMO</h3>
+                <div class="tasa-box">
+                    <span>Tasa USD ($):</span>
+                    <input type="number" id="tasa-cambio" value="36.50" step="0.1">
+                </div>
+            </div>
+
+            <!-- Menú de Pestañas -->
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('pos')">Caja / POS</button>
+                <button class="tab-btn" onclick="switchTab('inventario')">Inventario (3 Secciones)</button>
+                <button class="tab-btn" onclick="switchTab('caja')">Cierre de Caja</button>
+            </div>
+
+            <!-- Pestaña 1: POS / Pedidos -->
+            <div id="tab-pos" class="panel-content">
+                <h2>Registrar Venta / Pedido</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Seleccionar Producto:</label>
+                        <select id="producto-select">
+                            <!-- Se llena por JavaScript -->
+                        </select>
+                        <label>Cantidad (Bolitas / Unidades):</label>
+                        <input type="number" id="cantidad-input" value="1" min="1">
+                        <button onclick="agregarAlPedido()" style="margin-top: 15px; width: 100%;">Añadir al Pedido</button>
+                    </div>
+                    <div>
+                        <h3>Resumen del Ticket</h3>
+                        <div class="ticket-preview" id="ticket-actual">
+                            <p style="color: #888;">No hay productos agregados.</p>
+                        </div>
+                        <h3 id="total-pagar" style="margin-top: 15px; color: var(--verde-oscuro);">Total: $0.00</h3>
+                        <button onclick="procesarPago()" style="background-color: #ff7675; width: 100%; margin-top: 10px;">Cobrar Venta</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Inventario (3 Secciones 100% Editables) -->
+            <div id="tab-inventario" class="panel-content hidden">
+                <h2>Gestión de Inventario (Editable)</h2>
+                <p style="margin-bottom: 15px; color: #666;">Nota: En Barquillas y Tinas, 1 Gavera equivale a 50 bolitas de helado.</p>
+
+                <!-- SECCIÓN 1: BARQUILLAS -->
+                <div class="section-title">🍦 Sección: Barquillas</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sabor</th>
+                            <th>Precio ($)</th>
+                            <th>Gaveras</th>
+                            <th>Bolitas Totales</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-barquillas"></tbody>
+                </table>
+
+                <!-- SECCIÓN 2: TINAS -->
+                <div class="section-title">🍨 Sección: Tinas</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sabor</th>
+                            <th>Precio ($)</th>
+                            <th>Gaveras</th>
+                            <th>Bolitas Totales</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-tinas"></tbody>
+                </table>
+
+                <!-- SECCIÓN 3: PALETAS -->
+                <div class="section-title">🧊 Sección: Paletas</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sabor / Tipo</th>
+                            <th>Precio ($)</th>
+                            <th>Unidades Disponibles</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-paletas"></tbody>
+                </table>
+
+                <!-- AGREGAR NUEVO PRODUCTO -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Agregar Nuevo Producto al Inventario</h3>
+                    <div class="grid-2">
+                        <div>
+                            <label>Sección:</label>
+                            <select id="nuevo-seccion">
+                                <option value="barquillas">Barquilla</option>
+                                <option value="tinas">Tina</option>
+                                <option value="paletas">Paleta</option>
+                            </select>
+                            <label>Nombre del Sabor / Producto:</label>
+                            <input type="text" id="nuevo-nombre" placeholder="Ej: Ron con Pasas">
+                        </div>
+                        <div>
+                            <label>Precio ($):</label>
+                            <input type="number" id="nuevo-precio" placeholder="0.00" step="0.1">
+                            <label id="label-stock-nuevo">Gaveras (o Unidades si es paleta):</label>
+                            <input type="number" id="nuevo-stock" placeholder="Cantidad" value="1">
+                        </div>
+                    </div>
+                    <button onclick="agregarProductoNuevo()" style="margin-top: 15px; width: 100%;">Registrar Nuevo Producto</button>
+                </div>
+            </div>
+
+            <!-- Pestaña 3: Cierre de Caja e Imagen -->
+            <div id="tab-caja" class="panel-content hidden">
+                <h2>Cierre de Caja Diario</h2>
+                <div class="card" id="area-cierre" style="background: #fff; border: 2px solid var(--verde-pastel);">
+                    <h3>Reporte de Caja - Heladería ACMO</h3>
+                    <p>Fecha: <span id="fecha-hoy"></span></p>
+                    <hr style="margin: 10px 0;">
+                    <p>Total de Ventas Realizadas: <strong id="total-ventas-cantidad">0</strong></p>
+                    <p style="font-size: 1.4rem; margin-top: 10px;">Ingreso Total: <strong id="total-ingresos-caja" style="color: var(--verde-oscuro);">$0.00</strong></p>
+                </div>
+                <button onclick="descargarCierreImagen()" style="margin-top: 20px; width: 100%;">📥 Descargar / Compartir Cierre como Imagen</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Librería html2canvas para generar la imagen del cierre -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        // Inventario dividido en 3 secciones (Barquillas, Tinas, Paletas)
+        // Nota: En barquillas y tinas, guardamos gaveras. 1 Gavera = 50 bolitas.
+        let inventario = {
+            barquillas: [
+                { id: 'b1', nombre: 'Chocolate', precio: 2.50, gaveras: 2 }, // 100 bolitas
+                { id: 'b2', nombre: 'Fresa', precio: 2.50, gaveras: 1.5 }     // 75 bolitas
+            ],
+            tinas: [
+                { id: 't1', nombre: 'Mantecado', precio: 2.00, gaveras: 3 },  // 150 bolitas
+                { id: 't2', nombre: 'Puruco / Oreo', precio: 3.00, gaveras: 2} // 100 bolitas
+            ],
+            paletas: [
+                { id: 'p1', nombre: 'Paleta de Chocomenta', precio: 1.50, unidades: 24 },
+                { id: 'p2', nombre: 'Paleta de Fresa con Leche', precio: 1.50, unidades: 30 }
+            ]
+        };
+
+        let pedidoActual = [];
+        let totalVentasDia = 0;
+        let cantidadVentasDia = 0;
+
+        function login() {
+            let u = document.getElementById('user-input').value;
+            let p = document.getElementById('pass-input').value;
+            if(u !== "" && p !== "") {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                actualizarSelectProductos();
+                renderizarInventario();
+                document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString();
+            } else {
+                alert("Por favor ingrese usuario y contraseña.");
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.panel-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            if(tabName === 'pos') {
+                document.getElementById('tab-pos').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if(tabName === 'inventario') {
+                document.getElementById('tab-inventario').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if(tabName === 'caja') {
+                document.getElementById('tab-caja').classList.remove('hidden');
+                event.target.classList.add('active');
+            }
+        }
+
+        function actualizarSelectProductos() {
+            let select = document.getElementById('producto-select');
+            select.innerHTML = '';
+
+            // Cargar Barquillas
+            inventario.barquillas.forEach(item => {
+                let bolitasTotales = item.gaveras * 50;
+                let opt = document.createElement('option');
+                opt.value = `barquillas_${item.id}`;
+                opt.text = `[Barquilla] ${item.nombre} - $${item.precio.toFixed(2)} (Disponibles: ${bolitasTotales} bolitas)`;
+                select.appendChild(opt);
+            });
+
+            // Cargar Tinas
+            inventario.tinas.forEach(item => {
+                let bolitasTotales = item.gaveras * 50;
+                let opt = document.createElement('option');
+                opt.value = `tinas_${item.id}`;
+                opt.text = `[Tina] ${item.nombre} - $${item.precio.toFixed(2)} (Disponibles: ${bolitasTotales} bolitas)`;
+                select.appendChild(opt);
+            });
+
+            // Cargar Paletas
+            inventario.paletas.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = `paletas_${item.id}`;
+                opt.text = `[Paleta] ${item.nombre} - $${item.precio.toFixed(2)} (Stock: ${item.unidades} unids)`;
+                select.appendChild(opt);
+            });
+        }
+
+        function agregarAlPedido() {
+            let val = document.getElementById('producto-select').value;
+            let cant = parseInt(document.getElementById('cantidad-input').value);
+            if(!val || isNaN(cant) || cant <= 0) return;
+
+            let [seccion, id] = val.split('_');
+            let item = inventario[seccion].find(i => i.id === id);
+
+            if(seccion === 'paletas') {
+                if(item.unidades >= cant) {
+                    item.unidades -= cant;
+                } else {
+                    alert("Stock insuficiente de paletas.");
+                    return;
+                }
+            } else {
+                // Es barquilla o tina (se descuenta de gaveras: 1 gavera = 50 bolitas -> 1 bolita = 1/50 gaveras)
+                let bolitasDisponibles = item.gaveras * 50;
+                if(bolitasDisponibles >= cant) {
+                    let gaverasAGastar = cant / 50;
+                    item.gaveras -= gaverasAGastar;
+                } else {
+                    alert("No hay suficientes bolitas de helado en stock.");
+                    return;
+                }
+            }
+
+            // Agregar o actualizar en el ticket
+            let existe = pedidoActual.find(p => p.id === id && p.seccion === seccion);
+            if(existe) {
+                existe.cantidad += cant;
+            } else {
+                pedidoActual.push({ id: item.id, seccion: seccion, nombre: `[${seccion.toUpperCase()}] ${item.nombre}`, precio: item.precio, cantidad: cant });
+            }
+
+            actualizarSelectProductos();
+            renderizarPedido();
+            renderizarInventario();
+        }
+
+        function renderizarPedido() {
+            let contenedor = document.getElementById('ticket-actual');
+            let totalDiv = document.getElementById('total-pagar');
+            let tasa = parseFloat(document.getElementById('tasa-cambio').value) || 1;
+
+            if(pedidoActual.length === 0) {
+                contenedor.innerHTML = '<p style="color: #888;">No hay productos agregados.</p>';
+                totalDiv.innerText = "Total: $0.00";
+                return;
+            }
+
+            let html = "<ul>";
+            let totalUSD = 0;
+            pedidoActual.forEach(item => {
+                let sub = item.precio * item.cantidad;
+                totalUSD += sub;
+                html += `<li>${item.cantidad}x ${item.nombre} - $${sub.toFixed(2)}</li>`;
+            });
+            html += "</ul>";
+            contenedor.innerHTML = html;
+
+            let totalBs = totalUSD * tasa;
+            totalDiv.innerHTML = `Total: $${totalUSD.toFixed(2)} USD <br><span style="font-size: 1rem; color: #666;">Bs. ${totalBs.toFixed(2)}</span>`;
+        }
+
+        function procesarPago() {
+            if(pedidoActual.length === 0) {
+                alert("El pedido está vacío.");
+                return;
+            }
+            let totalUSD = pedidoActual.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            totalVentasDia += totalUSD;
+            cantidadVentasDia += 1;
+
+            document.getElementById('total-ventas-cantidad').innerText = cantidadVentasDia;
+            document.getElementById('total-ingresos-caja').innerText = `$${totalVentasDia.toFixed(2)}`;
+
+            alert("¡Venta cobrada con éxito!");
+            pedidoActual = [];
+            renderizarPedido();
+        }
+
+        function renderizarInventario() {
+            // Render Barquillas
+            let tbodyB = document.getElementById('tabla-barquillas');
+            tbodyB.innerHTML = '';
+            inventario.barquillas.forEach((item, index) => {
+                let bolitas = item.gaveras * 50;
+                tbodyB.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.nombre}" onchange="editarInventario('barquillas', ${index}, 'nombre', this.value)" style="margin:0; padding:5px;"></td>
+                        <td><input type="number" value="${item.precio}" step="0.1" onchange="editarInventario('barquillas', ${index}, 'precio', this.value)" style="margin:0; padding:5px; width:90px;"></td>
+                        <td><input type="number" value="${item.gaveras}" step="0.5" onchange="editarInventario('barquillas', ${index}, 'gaveras', this.value)" style="margin:0; padding:5px; width:80px;"></td>
+                        <td><b>${bolitas} bolitas</b></td>
+                        <td><button onclick="eliminarInventario('barquillas', ${index})" style="background:#ff7675; padding:5px 10px; font-size:0.8rem;">X</button></td>
+                    </tr>`;
+            });
+
+            // Render Tinas
+            let tbodyT = document.getElementById('tabla-tinas');
+            tbodyT.innerHTML = '';
+            inventario.tinas.forEach((item, index) => {
+                let bolitas = item.gaveras * 50;
+                tbodyT.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.nombre}" onchange="editarInventario('tinas', ${index}, 'nombre', this.value)" style="margin:0; padding:5px;"></td>
+                        <td><input type="number" value="${item.precio}" step="0.1" onchange="editarInventario('tinas', ${index}, 'precio', this.value)" style="margin:0; padding:5px; width:90px;"></td>
+                        <td><input type="number" value="${item.gaveras}" step="0.5" onchange="editarInventario('tinas', ${index}, 'gaveras', this.value)" style="margin:0; padding:5px; width:80px;"></td>
+                        <td><b>${bolitas} bolitas</b></td>
+                        <td><button onclick="eliminarInventario('tinas', ${index})" style="background:#ff7675; padding:5px 10px; font-size:0.8rem;">X</button></td>
+                    </tr>`;
+            });
+
+            // Render Paletas
+            let tbodyP = document.getElementById('tabla-paletas');
+            tbodyP.innerHTML = '';
+            inventario.paletas.forEach((item, index) => {
+                tbodyP.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.nombre}" onchange="editarInventario('paletas', ${index}, 'nombre', this.value)" style="margin:0; padding:5px;"></td>
+                        <td><input type="number" value="${item.precio}" step="0.1" onchange="editarInventario('paletas', ${index}, 'precio', this.value)" style="margin:0; padding:5px; width:90px;"></td>
+                        <td><input type="number" value="${item.unidades}" onchange="editarInventario('paletas', ${index}, 'unidades', this.value)" style="margin:0; padding:5px; width:80px;"> unids</td>
+                        <td><button onclick="eliminarInventario('paletas', ${index})" style="background:#ff7675; padding:5px 10px; font-size:0.8rem;">X</button></td>
+                    </tr>`;
+            });
+
+            actualizarSelectProductos();
+        }
+
+        function editarInventario(seccion, index, campo, valor) {
+            if(campo === 'precio' || campo === 'gaveras' || campo === 'unidades') {
+                inventario[seccion][index][campo] = parseFloat(valor);
+            } else {
+                inventario[seccion][index][campo] = valor;
+            }
+            renderizarInventario();
+        }
+
+        function eliminarInventario(seccion, index) {
+            inventario[seccion].splice(index, 1);
+            renderizarInventario();
+        }
+
+        function agregarProductoNuevo() {
+            let seccion = document.getElementById('nuevo-seccion').value;
+            let nombre = document.getElementById('nuevo-nombre').value;
+            let precio = parseFloat(document.getElementById('nuevo-precio').value);
+            let cantidad = parseFloat(document.getElementById('nuevo-stock').value);
+
+            if(!nombre || isNaN(precio) || isNaN(cantidad)) {
+                alert("Por favor completa todos los campos correctamente.");
+                return;
+            }
+
+            let nuevoId = seccion.charAt(0) + Date.now();
+            if(seccion === 'paletas') {
+                inventario.paletas.push({ id: nuevoId, nombre: nombre, precio: precio, unidades: cantidad });
+            } else {
+                inventario[seccion].push({ id: nuevoId, nombre: nombre, precio: precio, gaveras: cantidad });
+            }
+
+            document.getElementById('nuevo-nombre').value = '';
+            document.getElementById('nuevo-precio').value = '';
+            document.getElementById('nuevo-stock').value = '1';
+            renderizarInventario();
+        }
+
+        // Descargar Cierre de Caja como Imagen
+        function descargarCierreImagen() {
+            let area = document.getElementById('area-cierre');
+            html2canvas(area).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'cierre-de-caja-heladeria.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
